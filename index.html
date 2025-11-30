@@ -1,0 +1,687 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sharing & Caring - OTT Subscription Sharing</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f9fafb; /* Gray-50 */
+            color: #1f2937; /* Gray-800 */
+            overflow-x: hidden;
+        }
+        
+        /* Soft Shadows & Gradients */
+        .soft-shadow {
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.01);
+        }
+        
+        .glass-nav {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(229, 231, 235, 0.5);
+        }
+
+        .gradient-btn {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+        }
+        
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            transition: opacity 0.5s ease-out;
+        }
+        
+        .fade-in {
+            animation: fadeIn 0.5s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Hide scrollbar for clean look */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+
+        .app-screen {
+            min-height: 100vh;
+            padding-bottom: 80px; /* Space for bottom nav */
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-blue-100 text-slate-800">
+
+    <!-- 1. Splash Screen -->
+    <div id="splash" class="splash-screen">
+        <div class="text-center fade-in">
+            <div class="w-20 h-20 bg-blue-500 rounded-2xl mx-auto mb-4 flex items-center justify-center shadow-xl shadow-blue-200">
+                <i class="bi bi-share-fill text-white text-3xl"></i>
+            </div>
+            <h1 class="text-2xl font-bold tracking-tight text-gray-900">Sharing & Caring</h1>
+            <p class="text-gray-500 text-sm mt-2">Rent. Share. Enjoy.</p>
+        </div>
+    </div>
+
+    <!-- 2. Auth Screen (Login/Signup) -->
+    <div id="auth-screen" class="app-screen hidden flex flex-col justify-center items-center px-6 bg-white">
+        <div class="w-full max-w-sm fade-in">
+            <div class="text-center mb-8">
+                <div class="inline-flex items-center justify-center w-12 h-12 rounded-xl bg-blue-50 mb-4 text-blue-600">
+                    <i class="bi bi-shield-lock text-xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold">Welcome Back</h2>
+                <p class="text-gray-500 mt-1">Sign in to continue</p>
+            </div>
+
+            <form onsubmit="handleLogin(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1 ml-1">Email Address</label>
+                    <input type="email" required class="w-full px-4 py-3 rounded-xl bg-gray-50 border-transparent focus:border-blue-500 focus:bg-white focus:ring-0 transition-colors text-sm" placeholder="name@example.com">
+                </div>
+                <div>
+                    <label class="block text-xs font-medium text-gray-500 mb-1 ml-1">Password</label>
+                    <input type="password" required class="w-full px-4 py-3 rounded-xl bg-gray-50 border-transparent focus:border-blue-500 focus:bg-white focus:ring-0 transition-colors text-sm" placeholder="••••••••">
+                </div>
+                <div class="flex justify-end">
+                    <a href="#" class="text-xs text-blue-600 font-medium">Forgot Password?</a>
+                </div>
+                <button type="submit" class="w-full py-3.5 rounded-xl gradient-btn text-white font-medium shadow-lg shadow-blue-200 active:scale-[0.98] transition-transform">
+                    Sign In
+                </button>
+            </form>
+
+            <div class="relative my-8 text-center">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-gray-100"></div>
+                </div>
+                <span class="relative px-4 bg-white text-xs text-gray-400 uppercase tracking-wider">Or continue with</span>
+            </div>
+
+            <button onclick="handleLogin(event)" class="w-full py-3 rounded-xl border border-gray-200 flex items-center justify-center gap-3 hover:bg-gray-50 transition-colors">
+                <img src="https://www.svgrepo.com/show/475656/google-color.svg" class="w-5 h-5" alt="Google">
+                <span class="text-sm font-medium text-gray-700">Google</span>
+            </button>
+            
+            <p class="text-center mt-8 text-xs text-gray-500">
+                Don't have an account? <a href="#" class="text-blue-600 font-medium">Sign up</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Main App Container (Hidden until logged in) -->
+    <div id="main-app" class="hidden">
+        
+        <!-- Top Header for Mobile -->
+        <header class="fixed top-0 w-full bg-white/90 backdrop-blur-md z-30 px-6 py-4 flex justify-between items-center border-b border-gray-100">
+            <div class="flex items-center gap-2">
+                 <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                    <i class="bi bi-share-fill text-white text-xs"></i>
+                </div>
+                <span class="font-bold text-lg text-gray-800">Sharing & Caring</span>
+            </div>
+            <button onclick="navigateTo('support')" class="w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 text-gray-600">
+                <i class="bi bi-question-circle"></i>
+            </button>
+        </header>
+
+        <!-- 3. Home Screen -->
+        <section id="home-screen" class="app-screen pt-24 px-4 pb-24 fade-in block">
+            <div class="mb-6">
+                <h3 class="text-xl font-bold text-gray-800">Available Platforms</h3>
+                <p class="text-sm text-gray-500">Share premium accounts legally</p>
+            </div>
+
+            <!-- Filter Pills -->
+            <div class="flex gap-3 mb-6 overflow-x-auto pb-2 no-scrollbar">
+                <button class="px-4 py-1.5 bg-gray-800 text-white text-xs rounded-full whitespace-nowrap shadow-md">All</button>
+                <button class="px-4 py-1.5 bg-white text-gray-600 text-xs rounded-full whitespace-nowrap border border-gray-100 shadow-sm">Video</button>
+                <button class="px-4 py-1.5 bg-white text-gray-600 text-xs rounded-full whitespace-nowrap border border-gray-100 shadow-sm">Music</button>
+                <button class="px-4 py-1.5 bg-white text-gray-600 text-xs rounded-full whitespace-nowrap border border-gray-100 shadow-sm">Tools</button>
+            </div>
+
+            <!-- Cards Container -->
+            <div id="services-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Populated via JS -->
+            </div>
+        </section>
+
+        <!-- 4. Subscription Detail Screen -->
+        <section id="detail-screen" class="app-screen pt-20 px-0 pb-24 hidden bg-white">
+            <!-- Dynamic Content Header -->
+            <div class="relative h-48 bg-gray-100 w-full flex items-center justify-center" id="detail-header-bg">
+                <button onclick="navigateTo('home')" class="absolute top-4 left-4 w-10 h-10 bg-white/80 rounded-full flex items-center justify-center backdrop-blur shadow-sm z-10">
+                    <i class="bi bi-arrow-left text-lg"></i>
+                </button>
+                <div class="text-center z-10 pt-4">
+                    <img id="detail-logo" src="" class="w-16 h-16 rounded-xl shadow-lg mx-auto mb-3 object-cover" alt="Logo">
+                    <h2 id="detail-title" class="text-2xl font-bold text-gray-900"></h2>
+                </div>
+                <div class="absolute inset-0 bg-gradient-to-t from-white to-transparent"></div>
+            </div>
+
+            <div class="px-6 -mt-6 relative z-20">
+                <div class="flex justify-between items-end mb-6">
+                    <div>
+                        <p class="text-sm text-gray-500">Daily Price</p>
+                        <h1 class="text-3xl font-bold text-blue-600" id="detail-price"></h1>
+                    </div>
+                    <div class="flex items-center gap-1 bg-green-50 px-3 py-1 rounded-lg text-green-700 text-xs font-semibold">
+                        <i class="bi bi-star-fill text-[10px]"></i> 4.9 (2k+ verified)
+                    </div>
+                </div>
+
+                <div class="space-y-6">
+                    <div class="p-4 border border-gray-100 rounded-2xl soft-shadow bg-white">
+                        <h3 class="font-semibold text-gray-800 mb-3">Plan Features</h3>
+                        <ul class="space-y-3 text-sm text-gray-600">
+                            <li class="flex items-center gap-3"><i class="bi bi-check-circle-fill text-green-500"></i> Ultra HD (4K) Streaming</li>
+                            <li class="flex items-center gap-3"><i class="bi bi-check-circle-fill text-green-500"></i> Shared verified profile</li>
+                            <li class="flex items-center gap-3"><i class="bi bi-check-circle-fill text-green-500"></i> Download on mobile</li>
+                            <li class="flex items-center gap-3"><i class="bi bi-check-circle-fill text-green-500"></i> instant credentials delivery</li>
+                        </ul>
+                    </div>
+
+                    <div>
+                        <h3 class="font-semibold text-gray-800 mb-2">Terms of Sharing</h3>
+                        <p class="text-xs text-gray-500 leading-relaxed">By proceeding, you agree not to change the account password or add new profiles. Violation will result in a ban.</p>
+                    </div>
+
+                    <div class="pt-4">
+                        <button onclick="goToPayment()" class="w-full py-4 rounded-2xl gradient-btn text-white font-bold text-lg shadow-xl shadow-blue-200 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+                            Proceed to Pay <i class="bi bi-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 5. Payment Page -->
+        <section id="payment-screen" class="app-screen pt-20 px-6 pb-24 hidden bg-gray-50">
+            <div class="flex items-center gap-4 mb-6">
+                <button onclick="backToDetail()" class="text-gray-800"><i class="bi bi-arrow-left text-xl"></i></button>
+                <h2 class="text-xl font-bold">Checkout</h2>
+            </div>
+
+            <!-- Ticket Preview -->
+            <div class="bg-white rounded-2xl p-5 mb-6 soft-shadow border border-gray-100 relative overflow-hidden">
+                <div class="absolute top-0 right-0 w-16 h-16 bg-blue-500/10 rounded-bl-full"></div>
+                <div class="flex items-start justify-between mb-4">
+                    <div>
+                        <p class="text-xs text-gray-400 uppercase font-bold tracking-wider">Service</p>
+                        <h3 class="text-lg font-bold text-gray-900" id="pay-service-name">Netflix Premium</h3>
+                    </div>
+                    <div class="bg-blue-50 text-blue-600 px-3 py-1 rounded-lg text-xs font-bold">1 Day</div>
+                </div>
+                <div class="border-t border-dashed border-gray-200 my-3"></div>
+                <div class="flex justify-between items-center">
+                    <span class="text-sm text-gray-500">Total Amount</span>
+                    <span class="text-2xl font-bold text-gray-900" id="pay-amount">$2.00</span>
+                </div>
+            </div>
+
+            <h3 class="font-semibold text-gray-800 mb-4">Payment Method</h3>
+            
+            <div class="space-y-3 mb-6">
+                <!-- Card Payment -->
+                <label class="flex items-center gap-4 p-4 bg-white border border-blue-500 rounded-xl cursor-pointer shadow-sm relative">
+                    <div class="w-5 h-5 rounded-full border-2 border-blue-500 flex items-center justify-center">
+                        <div class="w-2.5 h-2.5 bg-blue-500 rounded-full"></div>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-bold text-gray-800">Credit / Debit Card</p>
+                        <p class="text-xs text-gray-400">Instant verification</p>
+                    </div>
+                    <i class="bi bi-credit-card text-xl text-gray-400"></i>
+                </label>
+
+                <!-- Wallet Payment -->
+                <label class="flex items-center gap-4 p-4 bg-white border border-gray-100 rounded-xl cursor-pointer relative opacity-60">
+                    <div class="w-5 h-5 rounded-full border-2 border-gray-300"></div>
+                    <div class="flex-1">
+                        <p class="text-sm font-bold text-gray-800">App Wallet</p>
+                        <p class="text-xs text-gray-400">Balance: $0.00</p>
+                    </div>
+                    <i class="bi bi-wallet2 text-xl text-gray-400"></i>
+                </label>
+            </div>
+
+            <!-- Card Form -->
+            <form onsubmit="processPayment(event)" class="bg-white p-5 rounded-2xl soft-shadow space-y-4">
+                <div>
+                    <label class="text-xs font-medium text-gray-500 mb-1 block">Card Number</label>
+                    <div class="relative">
+                        <input type="text" placeholder="0000 0000 0000 0000" class="w-full pl-10 pr-4 py-3 bg-gray-50 rounded-xl text-sm focus:bg-white border-transparent focus:ring-2 focus:ring-blue-500 transition-all" required>
+                        <i class="bi bi-credit-card-2-front absolute left-3.5 top-3.5 text-gray-400"></i>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-xs font-medium text-gray-500 mb-1 block">Expiry</label>
+                        <input type="text" placeholder="MM/YY" class="w-full px-4 py-3 bg-gray-50 rounded-xl text-sm focus:bg-white border-transparent focus:ring-2 focus:ring-blue-500 transition-all" required>
+                    </div>
+                    <div>
+                        <label class="text-xs font-medium text-gray-500 mb-1 block">CVC</label>
+                        <input type="password" placeholder="123" class="w-full px-4 py-3 bg-gray-50 rounded-xl text-sm focus:bg-white border-transparent focus:ring-2 focus:ring-blue-500 transition-all" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="w-full mt-4 py-3.5 rounded-xl gradient-btn text-white font-bold shadow-lg active:scale-[0.98] transition-all group">
+                    <span class="group-hover:hidden">Pay Securely</span>
+                    <span class="hidden group-hover:inline-block">Process Payment</span>
+                </button>
+            </form>
+        </section>
+
+        <!-- 6. Profile & Wallet Screen -->
+        <section id="wallet-screen" class="app-screen pt-24 px-6 pb-24 hidden">
+            <!-- Profile Card -->
+            <div class="flex items-center gap-4 mb-8">
+                <div class="w-16 h-16 rounded-full bg-gray-200 overflow-hidden border-2 border-white shadow-lg">
+                    <img src="https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?auto=format&fit=crop&w=150&h=150" alt="User" class="w-full h-full object-cover">
+                </div>
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">John Doe</h2>
+                    <span class="text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-md">Verified User</span>
+                </div>
+            </div>
+
+            <!-- Wallet Card -->
+            <div class="bg-gray-900 text-white rounded-2xl p-6 shadow-xl shadow-gray-300 mb-8 relative overflow-hidden">
+                <div class="absolute -right-10 -top-10 w-40 h-40 bg-white/5 rounded-full blur-3xl"></div>
+                <p class="text-gray-400 text-sm mb-1">Total Balance</p>
+                <div class="flex justify-between items-end">
+                    <h1 class="text-4xl font-bold" id="wallet-balance">$42.50</h1>
+                    <button class="bg-white/20 backdrop-blur hover:bg-white/30 px-4 py-2 rounded-lg text-sm transition-colors">
+                        <i class="bi bi-plus-lg mr-1"></i> Top Up
+                    </button>
+                </div>
+            </div>
+
+            <!-- Navigation List for Profile -->
+            <div class="bg-white rounded-2xl soft-shadow overflow-hidden hidden md:block mb-6">
+                 <!-- Desktop filler area -->
+            </div>
+
+            <!-- Transactions & Active -->
+            <div class="space-y-6">
+                <div>
+                    <h3 class="font-bold text-gray-800 mb-3">Active Rentals</h3>
+                    <div id="active-rentals-list" class="space-y-3">
+                         <!-- JS injects here -->
+                         <div class="bg-white p-4 rounded-2xl border border-gray-100 flex items-center justify-between shadow-sm">
+                             <div class="flex items-center gap-3">
+                                 <div class="w-10 h-10 rounded-lg bg-red-50 flex items-center justify-center text-red-600">N</div>
+                                 <div>
+                                     <p class="text-sm font-bold">Netflix Premium</p>
+                                     <p class="text-xs text-green-600">Expires in 4h</p>
+                                 </div>
+                             </div>
+                             <button class="px-3 py-1.5 bg-gray-100 text-xs rounded-lg font-medium">Credentials</button>
+                         </div>
+                    </div>
+                </div>
+
+                <div>
+                    <h3 class="font-bold text-gray-800 mb-3">Transaction History</h3>
+                    <div class="bg-white rounded-2xl p-2 border border-gray-100">
+                        <div class="flex items-center justify-between p-3 border-b border-gray-50 last:border-0">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs">
+                                    <i class="bi bi-arrow-down"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold">Disney+ Rent</p>
+                                    <p class="text-[10px] text-gray-400">Today, 10:00 AM</p>
+                                </div>
+                            </div>
+                            <span class="text-sm font-bold text-gray-800">-$1.50</span>
+                        </div>
+                        <div class="flex items-center justify-between p-3">
+                            <div class="flex items-center gap-3">
+                                <div class="w-8 h-8 rounded-full bg-green-50 text-green-600 flex items-center justify-center text-xs">
+                                    <i class="bi bi-arrow-up"></i>
+                                </div>
+                                <div>
+                                    <p class="text-sm font-semibold">Wallet Top-up</p>
+                                    <p class="text-[10px] text-gray-400">Yesterday</p>
+                                </div>
+                            </div>
+                            <span class="text-sm font-bold text-green-600">+$20.00</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 7. Support Screen -->
+        <section id="support-screen" class="app-screen pt-20 px-6 pb-24 hidden bg-white">
+            <h2 class="text-2xl font-bold text-gray-800 mb-2">Support Center</h2>
+            <p class="text-sm text-gray-500 mb-6">How can we help you today?</p>
+            
+            <div class="bg-gray-50 rounded-xl p-1 mb-6 flex gap-1">
+                <button class="flex-1 py-2 bg-white rounded-lg shadow-sm text-xs font-bold text-gray-800 text-center">Chat</button>
+                <button class="flex-1 py-2 text-xs font-medium text-gray-500 text-center">FAQ</button>
+            </div>
+
+            <!-- Chat UI -->
+            <div class="flex flex-col h-[50vh] bg-gray-50 rounded-2xl border border-gray-100 overflow-hidden">
+                <div class="flex-1 p-4 overflow-y-auto space-y-4">
+                    <div class="flex items-start gap-2">
+                        <div class="w-8 h-8 rounded-full bg-blue-500 flex items-center justify-center text-white text-xs flex-shrink-0"><i class="bi bi-robot"></i></div>
+                        <div class="bg-white p-3 rounded-2xl rounded-tl-none shadow-sm text-sm text-gray-600 max-w-[80%]">
+                            Hi there! I'm your support bot. How can I assist you with your rentals?
+                        </div>
+                    </div>
+                </div>
+                <div class="p-3 bg-white border-t border-gray-100 flex gap-2">
+                    <input type="text" placeholder="Type a message..." class="flex-1 bg-gray-100 rounded-full px-4 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500">
+                    <button class="w-9 h-9 rounded-full bg-blue-500 text-white flex items-center justify-center shadow-lg shadow-blue-200">
+                        <i class="bi bi-send-fill text-xs"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Quick FAQ Accordion (Visual Only) -->
+            <div class="mt-6 space-y-3">
+                <details class="group bg-white border border-gray-100 rounded-xl p-4 open:ring-1 open:ring-blue-100">
+                    <summary class="flex justify-between items-center font-medium cursor-pointer list-none text-sm">
+                        What if the password is wrong?
+                        <span class="transition group-open:rotate-180"><i class="bi bi-chevron-down"></i></span>
+                    </summary>
+                    <p class="text-xs text-gray-500 mt-3 group-open:animate-fadeIn">
+                        You can report the issue within 15 mins of renting for a full refund or replacement account.
+                    </p>
+                </details>
+                 <details class="group bg-white border border-gray-100 rounded-xl p-4 open:ring-1 open:ring-blue-100">
+                    <summary class="flex justify-between items-center font-medium cursor-pointer list-none text-sm">
+                        Can I share it with friends?
+                        <span class="transition group-open:rotate-180"><i class="bi bi-chevron-down"></i></span>
+                    </summary>
+                    <p class="text-xs text-gray-500 mt-3 group-open:animate-fadeIn">
+                        No. The rental is strictly for a single device usage as per terms.
+                    </p>
+                </details>
+            </div>
+        </section>
+        
+        <!-- Bottom Navigation -->
+        <nav class="fixed bottom-0 w-full glass-nav px-6 py-3 z-40">
+            <div class="flex justify-between items-center max-w-md mx-auto">
+                <button onclick="navigateTo('home')" id="nav-home" class="flex flex-col items-center text-blue-600 transition-colors">
+                    <i class="bi bi-house-door-fill text-xl mb-1"></i>
+                    <span class="text-[10px] font-medium">Home</span>
+                </button>
+                <button onclick="navigateTo('wallet')" id="nav-wallet" class="flex flex-col items-center text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="bi bi-wallet2 text-xl mb-1"></i>
+                    <span class="text-[10px] font-medium">Wallet</span>
+                </button>
+                 <button onclick="navigateTo('profile')" id="nav-profile" class="flex flex-col items-center text-gray-400 hover:text-gray-600 transition-colors">
+                    <i class="bi bi-person-fill text-xl mb-1"></i>
+                    <span class="text-[10px] font-medium">Profile</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+    
+    <!-- Generic Success Modal -->
+    <div id="success-modal" class="fixed inset-0 z-50 hidden flex items-center justify-center bg-black/50 backdrop-blur-sm fade-in">
+        <div class="bg-white rounded-3xl p-8 text-center max-w-[80%] shadow-2xl transform scale-100 transition-all">
+            <div class="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="bi bi-check-lg text-3xl text-green-600"></i>
+            </div>
+            <h3 class="text-xl font-bold text-gray-900 mb-2">Success!</h3>
+            <p class="text-sm text-gray-500 mb-6" id="success-message">Payment completed successfully.</p>
+            <button onclick="closeModal()" class="w-full py-3 rounded-xl bg-gray-900 text-white font-medium">Continue</button>
+        </div>
+    </div>
+
+    <script>
+        // --- Data ---
+        const services = [
+            {
+                id: 'netflix',
+                name: 'Netflix Premium',
+                provider: 'Netflix',
+                price: 2.00,
+                image: 'https://images.unsplash.com/photo-1574375927938-d5a98e8efe85?auto=format&fit=crop&w=800&q=80',
+                color: 'text-red-600',
+                bgColor: 'bg-red-50',
+                screens: '4 Screens'
+            },
+            {
+                id: 'disney',
+                name: 'Disney+ Hotstar',
+                provider: 'Disney+',
+                price: 1.50,
+                image: 'https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&w=800&q=80',
+                color: 'text-blue-900',
+                bgColor: 'bg-blue-50',
+                screens: '2 Screens'
+            },
+            {
+                id: 'prime',
+                name: 'Prime Video',
+                provider: 'Amazon',
+                price: 1.20,
+                image: 'https://images.unsplash.com/photo-1627843563095-f6e947c749bb?auto=format&fit=crop&w=800&q=80',
+                color: 'text-blue-400',
+                bgColor: 'bg-sky-50',
+                screens: '3 Screens'
+            },
+             {
+                id: 'hbo',
+                name: 'HBO Max',
+                provider: 'HBO',
+                price: 2.50,
+                image: 'https://images.unsplash.com/photo-1526509867162-5b0c0d1b4b33?auto=format&fit=crop&w=800&q=80', // Abstract tech img
+                color: 'text-purple-700',
+                bgColor: 'bg-purple-50',
+                screens: '4 Screens'
+            }
+        ];
+
+        let currentService = null;
+        let walletBalance = 42.50;
+
+        // --- Initialization ---
+        document.addEventListener('DOMContentLoaded', () => {
+            // Splash Logic
+            setTimeout(() => {
+                document.getElementById('splash').style.opacity = 0;
+                setTimeout(() => {
+                    document.getElementById('splash').style.display = 'none';
+                    document.getElementById('auth-screen').classList.remove('hidden');
+                    document.getElementById('auth-screen').classList.add('flex');
+                }, 500);
+            }, 2000);
+
+            // Populate Home Screen
+            const list = document.getElementById('services-list');
+            services.forEach(service => {
+                const card = document.createElement('div');
+                card.className = 'bg-white p-4 rounded-2xl border border-gray-100 shadow-sm hover:shadow-md transition-all group';
+                card.innerHTML = `
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="w-12 h-12 rounded-xl ${service.bgColor} flex items-center justify-center overflow-hidden">
+                            ${service.image.includes('unsplash') ? `<img src="${service.image}" class="w-full h-full object-cover opacity-90">` : `<i class="bi bi-tv text-xl ${service.color}"></i>`}
+                        </div>
+                        <div class="text-right">
+                            <span class="block text-lg font-bold text-gray-900">$${service.price.toFixed(2)}</span>
+                            <span class="text-[10px] text-gray-400 uppercase font-medium">Per Day</span>
+                        </div>
+                    </div>
+                    <h3 class="font-bold text-gray-800 mb-1">${service.name}</h3>
+                    <p class="text-xs text-gray-500 mb-4 flex items-center gap-2"><i class="bi bi-display"></i> ${service.screens}</p>
+                    <button onclick="openDetail('${service.id}')" class="w-full py-2.5 bg-gray-50 hover:bg-blue-50 text-gray-700 hover:text-blue-600 text-sm font-medium rounded-xl transition-colors border border-gray-100 flex items-center justify-center gap-2 group-hover:border-blue-200">
+                        Request Access <i class="bi bi-arrow-right text-xs opacity-50 group-hover:opacity-100 transition-opacity"></i>
+                    </button>
+                `;
+                list.appendChild(card);
+            });
+        });
+
+        // --- Navigation & Logic ---
+
+        function handleLogin(e) {
+            e.preventDefault();
+            // Fake Loading
+            const btn = e.target.tagName === 'FORM' ? e.target.querySelector('button') : e.target;
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span class="animate-pulse">Signing in...</span>';
+            
+            setTimeout(() => {
+                document.getElementById('auth-screen').classList.add('hidden');
+                document.getElementById('auth-screen').classList.remove('flex');
+                document.getElementById('main-app').classList.remove('hidden');
+                navigateTo('home');
+                btn.innerHTML = originalText; // Reset just in case
+            }, 1000);
+        }
+
+        function navigateTo(screenId) {
+            // Hide all screens
+            document.querySelectorAll('.app-screen').forEach(el => {
+                el.classList.add('hidden');
+                el.classList.remove('block');
+            });
+            
+            // Exception for Wallet and Profile: Both map to 'wallet-screen' logic visually in nav, 
+            // but instruction said "Wallet, Profile". 
+            // Let's map Profile click to Wallet Screen (which contains profile info per wireframe).
+            let targetId = screenId + '-screen';
+            
+            if(screenId === 'profile') targetId = 'wallet-screen'; 
+
+            const screen = document.getElementById(targetId);
+            if(screen) {
+                screen.classList.remove('hidden');
+                screen.classList.add('block');
+                // Scroll to top
+                window.scrollTo(0,0);
+            }
+
+            // Update Nav Active State
+            document.querySelectorAll('nav button').forEach(btn => {
+                btn.classList.remove('text-blue-600');
+                btn.classList.add('text-gray-400');
+                // Reset Icons
+                const icon = btn.querySelector('i');
+                icon.className = icon.className.replace('-fill', ''); 
+                if(icon.classList.contains('bi-house-door')) icon.classList.add('bi-house-door'); // Base class
+            });
+
+            // Activate current
+            const navId = 'nav-' + screenId;
+            const activeBtn = document.getElementById(navId);
+            if(activeBtn) {
+                activeBtn.classList.remove('text-gray-400');
+                activeBtn.classList.add('text-blue-600');
+                // Fill Icon
+                const icon = activeBtn.querySelector('i');
+                if(!icon.className.includes('-fill')) {
+                     // Simple switch for bootstrap icons usually adding -fill works, sometimes different class
+                     // Map specific icons
+                     if(icon.className.includes('bi-house-door')) icon.className = 'bi bi-house-door-fill text-xl mb-1';
+                     if(icon.className.includes('bi-wallet2')) icon.className = 'bi bi-wallet-fill text-xl mb-1';
+                     if(icon.className.includes('bi-person')) icon.className = 'bi bi-person-fill text-xl mb-1';
+                }
+            }
+        }
+
+        // --- Service Detail Flow ---
+
+        function openDetail(id) {
+            currentService = services.find(s => s.id === id);
+            if(!currentService) return;
+
+            // Populate Detail
+            document.getElementById('detail-title').innerText = currentService.name;
+            document.getElementById('detail-price').innerText = `$${currentService.price.toFixed(2)}`;
+            document.getElementById('detail-logo').src = currentService.image;
+            
+            // Switch Screen
+            document.querySelectorAll('.app-screen').forEach(el => el.classList.add('hidden'));
+            document.getElementById('detail-screen').classList.remove('hidden');
+            document.getElementById('detail-screen').classList.add('block');
+            window.scrollTo(0,0);
+        }
+
+        function goToPayment() {
+            if(!currentService) return;
+            
+            document.getElementById('pay-service-name').innerText = currentService.name;
+            document.getElementById('pay-amount').innerText = `$${currentService.price.toFixed(2)}`;
+
+            document.querySelectorAll('.app-screen').forEach(el => el.classList.add('hidden'));
+            document.getElementById('payment-screen').classList.remove('hidden');
+            document.getElementById('payment-screen').classList.add('block');
+            window.scrollTo(0,0);
+        }
+
+        function backToDetail() {
+            document.getElementById('payment-screen').classList.add('hidden');
+            document.getElementById('detail-screen').classList.remove('hidden');
+        }
+
+        function processPayment(e) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const original = btn.innerHTML;
+            btn.innerHTML = '<span class="animate-spin inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full"></span> Processing';
+            
+            setTimeout(() => {
+                // Success
+                document.getElementById('success-message').innerText = `You successfully rented ${currentService.name} for 1 day. Check your profile for credentials.`;
+                document.getElementById('success-modal').classList.remove('hidden');
+                btn.innerHTML = original;
+                
+                // Deduct Logic (Visual)
+                walletBalance -= currentService.price;
+                document.getElementById('wallet-balance').innerText = `$${walletBalance.toFixed(2)}`;
+                
+                // Add to active rentals (mock)
+                const list = document.getElementById('active-rentals-list');
+                const newItem = document.createElement('div');
+                newItem.className = 'bg-white p-4 rounded-2xl border border-gray-100 flex items-center justify-between shadow-sm animate-fadeIn';
+                newItem.innerHTML = `
+                     <div class="flex items-center gap-3">
+                         <div class="w-10 h-10 rounded-lg ${currentService.bgColor} flex items-center justify-center text-sm font-bold ${currentService.color}">${currentService.provider[0]}</div>
+                         <div>
+                             <p class="text-sm font-bold">${currentService.name}</p>
+                             <p class="text-xs text-green-600">Active Now</p>
+                         </div>
+                     </div>
+                     <button class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-xs rounded-lg font-medium transition-colors">Credentials</button>
+                `;
+                list.prepend(newItem);
+
+            }, 1500);
+        }
+
+        function closeModal() {
+            document.getElementById('success-modal').classList.add('hidden');
+            navigateTo('profile'); // Go to Wallet/Profile to see the new rental
+        }
+
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
